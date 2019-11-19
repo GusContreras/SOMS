@@ -53,6 +53,7 @@ private:
     void actualizaPesos(QVector<int> v, int i);
 
     void pintarCalor(QVector<double> x);
+    void pintarError(QVector<double> dist, QVector<double> iter);
 
     void clear();
 

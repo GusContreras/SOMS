@@ -15,15 +15,16 @@ MainWindow::MainWindow(QWidget *parent) :
                   QColor(255,254,0),QColor(255,154,0),
                 QColor(255,104,0),QColor(255,0,0)};
     ui->inputMalla->setText("14");
-    ui->inputF->setText("0.7");
+    ui->inputF->setText("0.5");
     ui->inputV->setText("2");
     ui->inputG->setText("1000");
 
-    QLinearGradient gradient(0, 0, 0, 400);
-    gradient.setColorAt(0, QColor(90, 90, 90));
-    gradient.setColorAt(0.38, QColor(105, 105, 105));
-    gradient.setColorAt(1, QColor(70, 70, 70));
-    ui->errorPlot->setBackground(QBrush(gradient));
+    ui->errorPlot->addGraph();
+    ui->errorPlot->graph(0)->setPen(QPen(Qt::darkBlue,3));
+    ui->errorPlot->graph(0)->setBrush(QBrush(QColor(0, 0, 255, 20)));
+    ui->errorPlot->graph(0)->setLineStyle(QCPGraph::lsLine);
+    ui->errorPlot->xAxis->setRange(0, 1.5);
+    ui->errorPlot->yAxis->setRange(0, 1.5);
 
 }
 
@@ -69,13 +70,25 @@ void MainWindow::on_SOM_clicked()
 
     for(int i = 0; i < pointVector.size(); i++)
     {
+        QVector<double> dist;
+        QVector<double> iter;
         for(int g = 0; g < G; g++)
         {
             QVector<double> ganador = neuronaGanadora(pointVector[i].Data);
             QVector<int> neighborhood = vecindario(ganador[0]);
             actualizaPesos(neighborhood,i);
+
+            dist.append(ganador[1]);
+            iter.append(g);
+            if(ganador[1] < 0.001)
+            {
+                break;
+            }
         }
         pintarCalor(pointVector[i].Data);
+        pintarError(dist,iter);
+        dist.clear();
+        iter.clear();
         ui->clase->setText(QString::number(i) + "     Clase " + QString::number(pointVector[i].Class));
     }
 }
@@ -212,6 +225,7 @@ QVector<double> MainWindow::neuronaGanadora(QVector<double> x)
             }
         }
     }
+    qDebug() << distancia;
     result.append(pos);
     result.append(distancia);
     return result;
@@ -371,11 +385,25 @@ void MainWindow::pintarCalor(QVector<double> x)
     ui->customPlot->update();
 }
 
+void MainWindow::pintarError(QVector<double> dist, QVector<double> iter)
+{
+    ui->errorPlot->xAxis->setRange(0, iter.size());
+    ui->errorPlot->yAxis->setRange(0, 1);
+    if(!tipoDistancia)
+    {
+        ui->errorPlot->yAxis->setRange(0, 5);
+    }
+    ui->errorPlot->graph(0)->setData(iter,dist);
+    ui->errorPlot->replot();
+    ui->errorPlot->update();
+}
+
 void MainWindow::clear()
 {
     pointVector.clear();
     malla.clear();
     ui->customPlot->clearGraphs();
+    ui->errorPlot->graph(0)->data()->clear();
 }
 
 void MainWindow::sleep(int msec)
@@ -394,12 +422,19 @@ void MainWindow::on_limpiar_clicked()
 
 void MainWindow::on_SOM_PROBAR_clicked()
 {
+    QVector<double> dist;
+    QVector<double> iter;
     for(int i = 0; i < pointVector.size(); i++)
     {
         sleep(700);
         QVector<double> ganador = neuronaGanadora(pointVector[i].Data);
         ui->clase->setText(QString::number(i) + "     Clase " + QString::number(pointVector[i].Class));
+        dist.append(ganador[1]);
+        iter.append(i);
         pintarCalor(pointVector[i].Data);
+        pintarError(dist,iter);
         qDebug() << pointVector[i].Data << ganador[1];
     }
+    dist.clear();
+    iter.clear();
 }
