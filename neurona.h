@@ -14,7 +14,7 @@ public:
     Neurona(int size);
     double distanciaHamming(QVector<double> x);
     double distanciaEuclidiana(QVector<double> x);
-    void actualiza(QVector<double> x, QVector<double> g, double n);
+    void actualiza(QVector<double> x, double n);
     double Rand();
 
     QVector<double> weights;

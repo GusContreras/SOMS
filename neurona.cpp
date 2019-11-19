@@ -36,11 +36,11 @@ double Neurona::distanciaEuclidiana(QVector<double> x)
     return sqrt(sumatoria);
 }
 
-void Neurona::actualiza(QVector<double> x, QVector<double> g, double n)
+void Neurona::actualiza(QVector<double> x, double n)
 {
     for(int i = 0; i < x.length(); i++)
     {
-        weights[i] += n*(x[i] - g[i]);
+        weights[i] += n*(x[i] - weights[i]);
     }
 }
 

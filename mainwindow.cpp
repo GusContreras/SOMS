@@ -10,15 +10,14 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->euclidiana->setChecked(true);
     ui->customPlot->xAxis->setTicks(false);
     ui->customPlot->yAxis->setTicks(false);
-    ui->errorPlot->xAxis->setTicks(false);
-    ui->errorPlot->yAxis->setTicks(false);
     myColors = {QColor(0,87,255),QColor(0,184,255),QColor(0,249,255),
                   QColor(0,255,172),QColor(0,255,64),QColor(75,255,0),
                   QColor(255,254,0),QColor(255,154,0),
                 QColor(255,104,0),QColor(255,0,0)};
     ui->inputMalla->setText("14");
-    ui->inputF->setText("0.9");
+    ui->inputF->setText("0.7");
     ui->inputV->setText("2");
+    ui->inputG->setText("1000");
 
     QLinearGradient gradient(0, 0, 0, 400);
     gradient.setColorAt(0, QColor(90, 90, 90));
@@ -66,12 +65,18 @@ void MainWindow::on_SOM_clicked()
     crearGraficas();
     inicializaMalla();
 
+    int G = ui->inputG->text().toInt();
+
     for(int i = 0; i < pointVector.size(); i++)
     {
-        QVector<double> ganador = neuronaGanadora(pointVector[i].Data);
-        QVector<int> neighborhood = vecindario(ganador[0]);
-        actualizaPesos(neighborhood,i,ganador[0]);
+        for(int g = 0; g < G; g++)
+        {
+            QVector<double> ganador = neuronaGanadora(pointVector[i].Data);
+            QVector<int> neighborhood = vecindario(ganador[0]);
+            actualizaPesos(neighborhood,i);
+        }
         pintarCalor(pointVector[i].Data);
+        ui->clase->setText(QString::number(i) + "     Clase " + QString::number(pointVector[i].Class));
     }
 }
 
@@ -249,7 +254,7 @@ QVector<int> MainWindow::vecindario(int pos)
     int fila = pos/size;
     int columna = pos - (fila*size);
 
-    //posiciones.append(pos);
+    posiciones.append(pos);
     for(int i = 1; i <= vSize; i++)
     {
         if(columna+i < size)
@@ -291,12 +296,12 @@ QVector<int> MainWindow::vecindario(int pos)
     return posiciones;
 }
 
-void MainWindow::actualizaPesos(QVector<int> v,int e, int g)
+void MainWindow::actualizaPesos(QVector<int> v,int e)
 {
     double n = ui->inputF->text().toDouble();
     for(int i = 0; i < v.size(); i++)
     {
-        malla[v[i]].actualiza(pointVector[e].Data,malla[g].weights,n);
+        malla[v[i]].actualiza(pointVector[e].Data,n);
     }
 }
 
@@ -391,9 +396,9 @@ void MainWindow::on_SOM_PROBAR_clicked()
 {
     for(int i = 0; i < pointVector.size(); i++)
     {
-        sleep(500);
+        sleep(700);
         QVector<double> ganador = neuronaGanadora(pointVector[i].Data);
-        ui->clase->setText(QString::number(pointVector[i].Class));
+        ui->clase->setText(QString::number(i) + "     Clase " + QString::number(pointVector[i].Class));
         pintarCalor(pointVector[i].Data);
         qDebug() << pointVector[i].Data << ganador[1];
     }

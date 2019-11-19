@@ -50,7 +50,7 @@ private:
     QVector<double> neuronaGanadora(QVector<double> x);
     QVector<double> peorNeurona(QVector<double> x);
     QVector<int> vecindario(int pos);
-    void actualizaPesos(QVector<int> v, int i, int g);
+    void actualizaPesos(QVector<int> v, int i);
 
     void pintarCalor(QVector<double> x);
 
